@@ -3,16 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <!-- Mobile responsiveness -->
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  
   <!-- Force Fullscreen on iPhone & Android -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="SmartPass">
+  <meta name="apple-mobile-web-app-title" content="@Me">
   <meta name="theme-color" content="#000000">
-  <title>Home - Buzz</title>
+  <title>@Me - Buzz</title>
   <style>
     /* CSS Variables for theming */
     :root {
@@ -59,10 +57,10 @@
       justify-content: space-between;
       align-items: center;
     }
+    /* Nav now shows "Buzz" in pink */
     .navbar .logo {
       font-size: 24px;
       font-weight: bold;
-      /* Now showing "Buzz" in pink */
       color: var(--nav-link-color);
     }
     
@@ -117,7 +115,7 @@
       fill: var(--nav-link-color);
     }
     
-    /* Feed Title (Now displays "@Beverly") */
+    /* Feed Title (Displays "@Beverly") */
     .feed-title {
       text-align: center;
       margin: 20px 0;
@@ -131,7 +129,7 @@
       color: var(--nav-link-color); /* pink for @ */
     }
     .feed-title h1 .name {
-      color: var(--school-name-color); /* orange for Beverly */
+      color: var(--school-name-color); /* bright orange for Beverly */
     }
     
     /* Main Container */
@@ -141,7 +139,7 @@
       padding: 20px;
     }
     
-    /* Sort Header - using segmented control */
+    /* Sort Header - Segmented Control */
     .sort-header {
       display: flex;
       justify-content: space-between;
@@ -306,8 +304,23 @@
       font-size: 16px;
     }
     .modal-container input[type="file"] {
+      display: none;
+    }
+    /* Custom file upload button */
+    .custom-file-btn {
+      display: inline-block;
       margin-top: 10px;
-      color: var(--main-accent);
+      padding: 8px 12px;
+      background-color: var(--main-accent);
+      color: var(--bg-color);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .custom-file-btn:hover {
+      background-color: #ff8c00;
     }
     .modal-container .modal-btns {
       margin-top: 15px;
@@ -343,18 +356,7 @@
       transform: rotate(90deg);
     }
     
-    /* Mobile adjustments */
-    @media (max-width: 600px) {
-      .navbar .logo { font-size: 20px; }
-      .hamburger-btn svg { width: 24px; height: 24px; }
-      .feed-title h1 { font-size: 28px; }
-      .sort-header .title { font-size: 18px; }
-      .sort-btn { font-size: 14px; padding: 6px 12px; }
-      .create-post-btn { width: 50px; height: 50px; }
-      .create-post-btn svg { width: 20px; height: 20px; }
-    }
-    
-    /* Floating Create Post Button (no bottom nav) */
+    /* Floating Create Post Button */
     .create-post-btn {
       position: fixed;
       bottom: 20px;
@@ -366,11 +368,14 @@
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      position: fixed;
       overflow: hidden;
       background: transparent;
       color: white;
-      font-size: 0; /* Hide any text */
+      font-size: 0;
+      transition: transform 0.2s ease;
+    }
+    .create-post-btn:active {
+      transform: translateX(-50%) scale(0.95);
     }
     .create-post-btn svg {
       width: 24px;
@@ -384,10 +389,22 @@
       left: 0;
       width: 100%;
       height: 100%;
+      /* Radial gradient: center remains semi-transparent black, edges fully opaque bright orange */
       background: radial-gradient(circle, rgba(0,0,0,0.5) 40%, rgba(255,165,0,1.0) 100%);
       filter: blur(8px);
       z-index: -1;
       border-radius: 50%;
+    }
+    
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .navbar .logo { font-size: 20px; }
+      .hamburger-btn svg { width: 24px; height: 24px; }
+      .feed-title h1 { font-size: 28px; }
+      .sort-header .title { font-size: 18px; }
+      .sort-btn { font-size: 14px; padding: 6px 12px; }
+      .create-post-btn { width: 50px; height: 50px; }
+      .create-post-btn svg { width: 20px; height: 20px; }
     }
   </style>
 </head>
@@ -426,7 +443,7 @@
   
   <!-- Feed Title (Feature Name) -->
   <section class="feed-title">
-    <h1 id="feedTitle"><span class="at" style="color: var(--nav-link-color);">@</span><span class="name" style="color: var(--school-name-color);">Beverly</span></h1>
+    <h1 id="feedTitle"><span class="at">@</span><span class="name">Beverly</span></h1>
   </section>
   
   <!-- Main Content Container -->
@@ -459,7 +476,9 @@
       <button class="modal-close" id="closeModalBtn">&times;</button>
       <h2>Create a Post</h2>
       <textarea id="modalPostText" placeholder="Share something..."></textarea>
-      <input type="file" id="modalPostImage" accept="image/*">
+      <!-- Hidden file input with a custom label -->
+      <input type="file" id="modalPostImage">
+      <label for="modalPostImage" class="custom-file-btn">Upload Image</label>
       <div class="modal-btns">
         <button id="cancelModalBtn">Cancel</button>
         <button id="modalCreatePostBtn">Post</button>
@@ -491,9 +510,10 @@
     
     function burstConfetti(button, color) {
       const rect = button.getBoundingClientRect();
+      // Add scroll offsets to get absolute coordinates
+      const offsetX = rect.left + rect.width / 2 + window.scrollX;
+      const offsetY = rect.top + rect.height / 2 + window.scrollY;
       for (let i = 0; i < 8; i++) {
-        const offsetX = rect.left + rect.width / 2;
-        const offsetY = rect.top + rect.height / 2;
         createConfetti(offsetX, offsetY, color, document.body);
       }
     }
