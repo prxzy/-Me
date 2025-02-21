@@ -369,6 +369,9 @@
       text-align: center;
       color: var(--main-text-color);
     }
+    textarea, input {
+  pointer-events: auto !important;
+}
     .modal-container textarea {
       width: 100%;
       min-height: 80px;
@@ -379,7 +382,8 @@
       color: var(--main-text-color);
       font-size: 16px;
       resize: none;
-      overflow: hidden;
+      overflow-y: auto; /* Allow scrolling */
+      pointer-events: auto !important;
     }
     .modal-container input[type="file"] {
       display: none;
