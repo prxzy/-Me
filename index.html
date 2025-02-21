@@ -306,21 +306,20 @@
     .modal-container input[type="file"] {
       display: none;
     }
-    /* Custom file upload button */
+    /* Custom File Upload Icon Button */
     .custom-file-btn {
       display: inline-block;
       margin-top: 10px;
-      padding: 8px 12px;
-      background-color: var(--main-accent);
-      color: var(--bg-color);
-      border: none;
-      border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s;
-      font-size: 16px;
     }
-    .custom-file-btn:hover {
-      background-color: #ff8c00;
+    .custom-file-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--main-accent);
+      transition: fill 0.3s;
+    }
+    .custom-file-btn:hover svg {
+      fill: #ff8c00;
     }
     .modal-container .modal-btns {
       margin-top: 15px;
@@ -389,8 +388,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      /* Radial gradient: center remains semi-transparent black, edges fully opaque bright orange */
-      background: radial-gradient(circle, rgba(0,0,0,0.5) 40%, rgba(255,165,0,1.0) 100%);
+      background: radial-gradient(circle, rgba(0,0,0,0.5) 40%, rgba(255,165,0,1) 100%);
       filter: blur(8px);
       z-index: -1;
       border-radius: 50%;
@@ -441,7 +439,7 @@
     </div>
   </div>
   
-  <!-- Feed Title (Feature Name) -->
+  <!-- Feed Title (Displays "@Beverly") -->
   <section class="feed-title">
     <h1 id="feedTitle"><span class="at">@</span><span class="name">Beverly</span></h1>
   </section>
@@ -474,11 +472,14 @@
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal-container">
       <button class="modal-close" id="closeModalBtn">&times;</button>
-      <h2>Create a Post</h2>
-      <textarea id="modalPostText" placeholder="Share something..."></textarea>
-      <!-- Hidden file input with a custom label -->
+      <h2>Ignite Your Buzz!</h2>
+      <textarea id="modalPostText" placeholder="What's poppin'?"></textarea>
       <input type="file" id="modalPostImage">
-      <label for="modalPostImage" class="custom-file-btn">Upload Image</label>
+      <label for="modalPostImage" class="custom-file-btn">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 5c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 2c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5zm6.5-.5h-2l-1-1h-5l-1 1h-2C7.67 6.5 7 7.17 7 8v1h14V8c0-.83-.67-1.5-1.5-1.5z"/>
+        </svg>
+      </label>
       <div class="modal-btns">
         <button id="cancelModalBtn">Cancel</button>
         <button id="modalCreatePostBtn">Post</button>
@@ -510,7 +511,7 @@
     
     function burstConfetti(button, color) {
       const rect = button.getBoundingClientRect();
-      // Add scroll offsets to get absolute coordinates
+      // Account for scroll offsets
       const offsetX = rect.left + rect.width / 2 + window.scrollX;
       const offsetY = rect.top + rect.height / 2 + window.scrollY;
       for (let i = 0; i < 8; i++) {
