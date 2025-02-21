@@ -234,7 +234,6 @@
       position: absolute;
       top: 20px;
       right: 20px;
-
     }
     .medal {
       width: 24px;
@@ -370,8 +369,8 @@
       color: var(--main-text-color);
     }
     textarea, input {
-  pointer-events: auto !important;
-}
+      pointer-events: auto !important;
+    }
     .modal-container textarea {
       width: 100%;
       min-height: 80px;
@@ -395,14 +394,11 @@
       cursor: pointer;
       text-align: center;
     }
-    .custom-file-btn svg {
-      width: 28px;
-      height: 28px;
-      fill: var(--main-accent);
-      transition: fill 0.3s;
-    }
-    .custom-file-btn:hover svg {
-      fill: #ff8c00;
+    /* Use the IMG.SVG PATH for the image upload icon */
+    .custom-file-btn img.icon {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
     }
     .modal-container .modal-btns {
       margin-top: 20px;
@@ -562,9 +558,9 @@
       <button class="modal-close" id="closeModalBtn">&times;</button>
       <h2>Draft</h2>
       <textarea id="modalPostText" placeholder="What's happening?"></textarea>
-      <input type="file" id="modalPostImage">
+      <input type="file" id="modalPostImage" accept="image/*">
       <label for="modalPostImage" class="custom-file-btn">
-          <img class ="icon" src="./assets/img.svg" width="100" height="100">
+          <img class="icon" src="./assets/img.svg" width="100" height="100" alt="Attach Image">
       </label>
       <div class="modal-btns">
         <button id="modalCreatePostBtn">Post</button>
@@ -678,12 +674,22 @@
         contentDiv.textContent = post.text;
         postDiv.appendChild(contentDiv);
     
-        // Dynamic relative time
-        const dateDiv = document.createElement('div');
+        
+    
+        // If image exists, add an image preview to the post
+        if (post.image) {
+          const img = document.createElement('img');
+          img.className = 'post-image';
+          img.src = post.image;
+          img.alt = "Attached Image";
+          postDiv.appendChild(img);
+        }
+    // Dynamic relative time
+    const dateDiv = document.createElement('div');
         dateDiv.className = 'post-date';
         dateDiv.textContent = getRelativeTime(post.date);
         postDiv.appendChild(dateDiv);
-    
+
         // Actions (like/dislike)
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'actions';
@@ -850,11 +856,28 @@
       modalOverlay.classList.remove('show');
       document.getElementById('modalPostText').value = '';
       document.getElementById('modalPostImage').value = '';
+      // Reset the preview image back to default
+      document.querySelector('.custom-file-btn img.icon').src = './assets/img.svg';
       openModalBtn.classList.remove('pressed');
     }
     openModalBtn.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
     if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+    
+    // Add image preview in the draft
+    document.getElementById('modalPostImage').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const previewImg = document.querySelector('.custom-file-btn img.icon');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImg.src = './assets/img.svg';
+      }
+    });
     
     // Handle post creation from modal
     modalCreatePostBtn.addEventListener('click', async () => {
