@@ -302,6 +302,8 @@
       color: var(--main-text-color);
       resize: vertical;
       font-size: 16px;
+      resize: none;
+      overflow: hidden;
     }
     .modal-container input[type="file"] {
       display: none;
@@ -324,6 +326,7 @@
     .modal-container .modal-btns {
       margin-top: 15px;
       display: flex;
+      align-items: right;
       justify-content: space-between;
     }
     .modal-container .modal-btns button {
@@ -472,17 +475,14 @@
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal-container">
       <button class="modal-close" id="closeModalBtn">&times;</button>
-      <h2>Ignite Your Buzz!</h2>
-      <textarea id="modalPostText" placeholder="What's poppin'?"></textarea>
+      <h2>Draft</h2>
+      <textarea id="modalPostText" placeholder="What's happening?"></textarea>
       <input type="file" id="modalPostImage">
       <label for="modalPostImage" class="custom-file-btn">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M12 5c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 2c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5zm6.5-.5h-2l-1-1h-5l-1 1h-2C7.67 6.5 7 7.17 7 8v1h14V8c0-.83-.67-1.5-1.5-1.5z"/>
-        </svg>
+        <img class ="icon" src="./assets/img.svg" width="100" height="100">
       </label>
       <div class="modal-btns">
-        <button id="cancelModalBtn">Cancel</button>
-        <button id="modalCreatePostBtn">Post</button>
+        <button id="modalCreatePostBtn">Buzz</button>
       </div>
     </div>
   </div>
