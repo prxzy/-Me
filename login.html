@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Ensure proper scaling on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gist - The Talk of Campus</title>
+  <style>
+    /* Global box sizing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #000;
+      color: #ff69b4;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    h1, p {
+      text-align: center;
+    }
+    form {
+      background: #111;
+      border: 1px solid #ff69b4;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Each step is hidden by default */
+    .step {
+      display: none;
+      transition: filter 0.5s ease, opacity 0.5s ease;
+      opacity: 1;
+      filter: blur(0);
+    }
+    /* Active step is visible */
+    .step.active {
+      display: block;
+    }
+    /* Blur animation */
+    .step.blur {
+      filter: blur(5px);
+      opacity: 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ff69b4;
+      border-radius: 4px;
+      background: #222;
+      color: #ff69b4;
+    }
+    .btn {
+      width: 48%;
+      padding: 10px;
+      background: #ff69b4;
+      border: none;
+      border-radius: 4px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px 1%;
+    }
+    .btn:hover {
+      background: #ff85c1;
+    }
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    /* Mobile responsiveness */
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 10px;
+      }
+      form {
+        padding: 15px;
+      }
+      .btn {
+        width: 48%;
+        margin: 5px 1%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="home.html">Gist</a>
+    <p>The Talk of Campus</p>
+    <form id="signupForm">
+      <!-- Step 1: School Email & Password -->
+      <div class="step active" id="step-1">
+        <label for="email">School Email:</label>
+        <input type="email" id="email" name="email" required placeholder="you@school.edu">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required placeholder="Your Password">
+        <div style="text-align: center;">
+          <button type="button" class="btn" onclick="loginUser()">Login</button>
+          <button type="button" class="btn" onclick="nextStep()">Register</button>
+        </div>
+      </div>
+      
+      <!-- Step 2: Full Name & Profile Picture -->
+      <div class="step" id="step-2">
+        <label for="fullname">Full Name:</label>
+        <input type="text" id="fullname" name="fullname" required placeholder="First Last">
+        <label for="profilePic">Profile Picture:</label>
+        <input type="file" id="profilePic" name="profilePic" accept="image/*">
+        <button type="submit" class="btn" style="width: 100%;">Sign Up</button>
+      </div>
+    </form>
+    <div class="message" id="message"></div>
+  </div>
+  
+  <script>
+    var currentStep = 1;
+    var totalSteps = 2;
+    // Global banned words list loaded from utils/bad-words.txt.
+    var bannedWords = [];
+
+    // Load the banned words from goss/utils/bad-words.txt (one word per line).
+    fetch('utils/bad-words.txt')
+      .then(response => response.text())
+      .then(text => {
+        bannedWords = text.split('\n')
+                          .map(word => word.trim().toLowerCase())
+                          .filter(word => word.length > 0);
+        console.log('Banned words loaded:', bannedWords);
+      })
+      .catch(error => console.error('Error loading bad-words.txt:', error));
+    
+    function nextStep() {
+      var currentDiv = document.getElementById('step-' + currentStep);
+      currentDiv.classList.add('blur');
+      setTimeout(function(){
+        currentDiv.classList.remove('active', 'blur');
+        currentDiv.style.display = 'none';
+        currentStep++;
+        if(currentStep <= totalSteps) {
+          var nextDiv = document.getElementById('step-' + currentStep);
+          nextDiv.style.display = 'block';
+          void nextDiv.offsetWidth; // force reflow
+          nextDiv.classList.add('active');
+        }
+      }, 500); // duration matches the CSS transition
+    }
+    
+    function loginUser() {
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      if (!email || !password) {
+        alert("Please enter both your school email and password.");
+        return;
+      }
+      document.getElementById('message').textContent = "Logged in successfully!";
+      console.log("Login attempt with Email:", email, "Password:", password);
+      // Real login functionality would involve server-side verification.
+    }
+    
+    // Full name validation: exactly two words, only letters, and no banned/profane words.
+    // Global banned words list, loaded from utils/bad-words.txt.
+// Global banned words list, loaded from utils/bad-words.txt.
+var bannedWords = [];
+
+// Load the banned words from goss/utils/bad-words.txt (one word per line).
+fetch('utils/bad-words.txt')
+  .then(response => response.text())
+  .then(text => {
+    bannedWords = text.split('\n')
+                      .map(word => word.trim().toLowerCase())
+                      .filter(word => word.length > 0);
+    console.log('Banned words loaded:', bannedWords);
+  })
+  .catch(error => console.error('Error loading bad-words.txt:', error));
+
+
+// Full name validation: exactly two words, only letters, and no profanity.
+function isValidFullName(fullname) {
+    var words = fullname.trim().split(/\s+/);
+    
+    // Ensure the name has exactly two words
+    if (words.length !== 2) {
+        return false;
+    }
+
+    var letterRegex = /^[A-Za-z]+$/; // Only allows letters (no numbers/symbols)
+    var fullNameLower = fullname.toLowerCase(); // Convert full name to lowercase for checking
+
+    // Check if any word contains profanity
+    for (var i = 0; i < words.length; i++) {
+        var word = words[i];
+
+        // Ensure the word contains only letters
+        if (!letterRegex.test(word)) {
+            return false;
+        }
+
+        // Check if any banned word appears anywhere in the full name
+        for (var j = 0; j < bannedWords.length; j++) {
+            var badWord = bannedWords[j];
+
+            // Check if the full name contains the banned word
+            if (fullNameLower.includes(badWord)) {
+                return false;
+            }
+
+            // Check for word boundary (ensures exact word match, not substrings inside legitimate words)
+            var regex = new RegExp(`\\b${badWord}\\b`, 'gi');
+            if (regex.test(fullname)) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+
+    // Form submission handler for registration
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      var fullname = document.getElementById('fullname').value;
+      var school = "";
+      
+      // Detect school based on email: if it contains "bhusd", assign Beverly Hills High School.
+      if (email.toLowerCase().includes("bhusd")) {
+        school = "Beverly Hills High School";
+      }
+      
+      if (!email || !password || !fullname) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      
+      if (!isValidFullName(fullname)) {
+        alert("Please enter a valid full name with exactly two words, containing only letters and no profanity.");
+        return;
+      }
+      
+      document.getElementById('message').textContent = "Registration submitted successfully!";
+      console.log("Registration details:");
+      console.log("Email:", email);
+      console.log("Password:", password);
+      console.log("Full Name:", fullname);
+      console.log("School:", school);
+      // Profile picture handling would be implemented server-side.
+    });
+  </script>
+</body>
+</html>
