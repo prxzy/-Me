@@ -57,7 +57,6 @@
       justify-content: space-between;
       align-items: center;
     }
-    /* Nav now shows "Buzz" in pink */
     .navbar .logo {
       font-size: 24px;
       font-weight: bold;
@@ -126,10 +125,10 @@
       margin: 0;
     }
     .feed-title h1 .at {
-      color: var(--nav-link-color); /* pink for @ */
+      color: var(--nav-link-color);
     }
     .feed-title h1 .name {
-      color: var(--school-name-color); /* bright orange for Beverly */
+      color: var(--school-name-color);
     }
     
     /* Main Container */
@@ -184,7 +183,6 @@
       margin-bottom: 20px;
       position: relative;
     }
-    /* New post rendering: username and content */
     .post-user {
       font-size: 16px;
       font-weight: bold;
@@ -230,6 +228,80 @@
       display: inline-block;
       text-align: center;
       color: var(--main-text-color);
+    }
+    /* Medal container for top 3 liked posts */
+    .medal-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+
+    }
+    .medal {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* Comment Section Styles */
+    .comments-section {
+      margin-top: 10px;
+      border-top: 1px solid var(--main-accent);
+      padding-top: 10px;
+    }
+    .comments-toggle {
+      background: none;
+      border: none;
+      color: var(--main-text-color);
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .comment {
+      margin-bottom: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid #333;
+    }
+    .comment:last-child {
+      border-bottom: none;
+    }
+    .comment-user {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--school-name-color);
+    }
+    .comment-text {
+      font-size: 14px;
+      color: #fff;
+      margin: 2px 0;
+    }
+    .comment-date {
+      font-size: 12px;
+      color: #aaa;
+    }
+    .comment-form {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+    .comment-form input {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid var(--main-accent);
+      border-radius: 4px;
+      background: #222;
+      color: #fff;
+    }
+    .comment-form button {
+      padding: 6px 12px;
+      background: var(--main-accent);
+      border: none;
+      border-radius: 4px;
+      color: var(--bg-color);
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 14px;
+    }
+    .comment-form button:hover {
+      background: #ff8c00;
     }
     
     /* SVG Icon Styles */
@@ -368,8 +440,8 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1050;
-      width: 80px;
-      height: 80px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       border: none;
       cursor: pointer;
@@ -413,7 +485,7 @@
       .feed-title h1 { font-size: 28px; }
       .sort-header .title { font-size: 18px; }
       .sort-btn { font-size: 14px; padding: 6px 12px; }
-      .create-post-btn { width: 80px; height: 80px; }
+      .create-post-btn { width: 100px; height: 100px; }
       .create-post-btn svg { width: 40px; height: 40px; }
     }
   </style>
@@ -488,7 +560,7 @@
       <textarea id="modalPostText" placeholder="What's happening?"></textarea>
       <input type="file" id="modalPostImage">
       <label for="modalPostImage" class="custom-file-btn">
-        <img class ="icon" src="./assets/img.svg" width="100" height="100">
+          <img class ="icon" src="./assets/img.svg" width="100" height="100">
       </label>
       <div class="modal-btns">
         <button id="modalCreatePostBtn">Post</button>
@@ -498,26 +570,43 @@
   
   <script>
     // Banned words array (simulate loading from bad-words.txt)
-    const badWords = ["fuck", "shit", "bitch", "ass", "damn", "crap"];
+    let bannedWords = ["fuck", "shit", "bitch", "ass", "damn", "crap"];
     
     // Function to censor text by replacing banned words with asterisks
     function censorText(text) {
       let censored = text;
-      badWords.forEach(word => {
-        // Create a case-insensitive regex to match whole words
+      bannedWords.forEach(word => {
         const regex = new RegExp(`\\b${word}\\b`, 'gi');
         censored = censored.replace(regex, '*'.repeat(word.length));
       });
       return censored;
     }
     
-    let posts = []; // Array to hold posts: { text, image, likes, dislikes, date }
-    
-    // Format date for display
-    function formatDate(date) {
-      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return new Date(date).toLocaleDateString(undefined, options);
+    // Dynamic relative time function
+    function getRelativeTime(date) {
+      const now = new Date();
+      const then = new Date(date);
+      const diff = Math.floor((now - then) / 1000);
+      if (diff < 60) {
+        return diff === 1 ? "1 second ago" : `${diff} seconds ago`;
+      } else if (diff < 3600) {
+        const minutes = Math.floor(diff / 60);
+        return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+      } else if (diff < 86400) {
+        const hours = Math.floor(diff / 3600);
+        return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+      } else if (diff < 604800) {
+        const days = Math.floor(diff / 86400);
+        return days === 1 ? "1 day ago" : `${days} days ago`;
+      } else if (diff < 2419200) {
+        const weeks = Math.floor(diff / 604800);
+        return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+      } else {
+        return new Date(date).toLocaleDateString();
+      }
     }
+    
+    let posts = []; // Array to hold posts: { text, image, likes, dislikes, date, comments }
     
     // Confetti functions for burst effects
     function createConfetti(x, y, color, container) {
@@ -534,7 +623,6 @@
     
     function burstConfetti(button, color) {
       const rect = button.getBoundingClientRect();
-      // Account for scroll offsets
       const offsetX = rect.left + rect.width / 2 + window.scrollX;
       const offsetY = rect.top + rect.height / 2 + window.scrollY;
       for (let i = 0; i < 8; i++) {
@@ -542,35 +630,60 @@
       }
     }
     
-    // Render posts into the posts container
+    // Returns the medal icon as an <img> element based on rank
+    function getMedalIcon(rank) {
+      if (rank === 0) {
+        return `<img class="medal" src="./assets/gold.svg" alt="Gold Medal">`;
+      } else if (rank === 1) {
+        return `<img class="medal" src="./assets/silver.svg" alt="Silver Medal">`;
+      } else if (rank === 2) {
+        return `<img class="medal" src="./assets/bronze.svg" alt="Bronze Medal">`;
+      }
+      return "";
+    }
+    
+    // Render posts into the posts container (including comments and medals)
     function renderPosts() {
       const container = document.getElementById('postsContainer');
       container.innerHTML = '';
+      // Create a sorted copy for medal ranking
+      const topLiked = [...posts].sort((a, b) => b.likes - a.likes);
+      
       posts.forEach((post, index) => {
         const postDiv = document.createElement('div');
         postDiv.className = 'post';
     
-        // Create a username element (always "Anonymous")
+        // Medal if in top 3
+        const rank = topLiked.indexOf(post);
+        if (rank >= 0 && rank < 3) {
+          const medalContainer = document.createElement('div');
+          medalContainer.className = 'medal-container';
+          medalContainer.innerHTML = getMedalIcon(rank);
+          postDiv.appendChild(medalContainer);
+        }
+    
+        // Username element (always "Anonymous")
         const userDiv = document.createElement('div');
         userDiv.className = 'post-user';
         userDiv.textContent = "Anonymous";
         postDiv.appendChild(userDiv);
     
-        // Create content element with censored text (displayed in white)
+        // Content element with censored text (in white)
         const contentDiv = document.createElement('div');
         contentDiv.className = 'post-content';
         contentDiv.textContent = post.text;
         postDiv.appendChild(contentDiv);
     
+        // Dynamic relative time
         const dateDiv = document.createElement('div');
         dateDiv.className = 'post-date';
-        dateDiv.textContent = formatDate(post.date);
+        dateDiv.textContent = getRelativeTime(post.date);
         postDiv.appendChild(dateDiv);
     
+        // Actions (like/dislike)
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'actions';
     
-        // Like button with SVG and confetti
         const likeBtn = document.createElement('button');
         likeBtn.innerHTML = `
           <svg class="icon" viewBox="0 0 24 24">
@@ -579,33 +692,113 @@
               1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"/>
           </svg>`;
         likeBtn.addEventListener('click', () => {
-          posts[index].likes++;
+          post.likes++;
           burstConfetti(likeBtn, getComputedStyle(document.documentElement).getPropertyValue('--like-color'));
           sortPosts();
         });
         actionsDiv.appendChild(likeBtn);
         const likeCount = document.createElement('span');
-        likeCount.textContent = posts[index].likes;
+        likeCount.textContent = post.likes;
         actionsDiv.appendChild(likeCount);
     
-         // Dislike button with SVG and confetti
-       const dislikeBtn = document.createElement('button');
+        const dislikeBtn = document.createElement('button');
         dislikeBtn.innerHTML = `
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22L1.14 11.27C1.05 11.5 1 11.74 1 12v1c0 
               1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.58-6.59c.37-.36.59-.86.59-1.41V3z"/>
           </svg>`;
         dislikeBtn.addEventListener('click', () => {
-          posts[index].dislikes++;
+          post.dislikes++;
           burstConfetti(dislikeBtn, getComputedStyle(document.documentElement).getPropertyValue('--dislike-color'));
           sortPosts();
         });
         actionsDiv.appendChild(dislikeBtn);
         const dislikeCount = document.createElement('span');
-        dislikeCount.textContent = posts[index].dislikes;
+        dislikeCount.textContent = post.dislikes;
         actionsDiv.appendChild(dislikeCount);
     
         postDiv.appendChild(actionsDiv);
+    
+        // Comments toggle button (show count)
+        const commentsToggle = document.createElement('button');
+        commentsToggle.className = 'comments-toggle';
+        const commentCount = post.comments ? post.comments.length : 0;
+        commentsToggle.textContent = `View Comments (${commentCount})`;
+        postDiv.appendChild(commentsToggle);
+    
+        // Comments section (initially hidden)
+        const commentsSection = document.createElement('div');
+        commentsSection.className = 'comments-section';
+        commentsSection.style.display = 'none';
+    
+        commentsToggle.addEventListener('click', () => {
+          if (commentsSection.style.display === 'none') {
+            commentsSection.style.display = 'block';
+            commentsToggle.textContent = `Hide Comments (${commentCount})`;
+          } else {
+            commentsSection.style.display = 'none';
+            commentsToggle.textContent = `View Comments (${commentCount})`;
+          }
+        });
+    
+        // Render existing comments
+        if (post.comments && post.comments.length > 0) {
+          post.comments.forEach(comment => {
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+    
+            const commentUser = document.createElement('div');
+            commentUser.className = 'comment-user';
+            commentUser.textContent = "Anonymous";
+            commentDiv.appendChild(commentUser);
+    
+            const commentText = document.createElement('div');
+            commentText.className = 'comment-text';
+            commentText.textContent = comment.text;
+            commentDiv.appendChild(commentText);
+    
+            const commentDate = document.createElement('div');
+            commentDate.className = 'comment-date';
+            commentDate.textContent = getRelativeTime(comment.date);
+            commentDiv.appendChild(commentDate);
+    
+            commentsSection.appendChild(commentDiv);
+          });
+        }
+    
+        // Comment form
+        const commentForm = document.createElement('div');
+        commentForm.className = 'comment-form';
+    
+        const commentInput = document.createElement('input');
+        commentInput.type = 'text';
+        commentInput.placeholder = "Add a comment...";
+        commentForm.appendChild(commentInput);
+    
+        const commentSubmit = document.createElement('button');
+        commentSubmit.textContent = "Comment";
+        commentForm.appendChild(commentSubmit);
+    
+        commentSubmit.addEventListener('click', () => {
+          let commentText = commentInput.value.trim();
+          if (!commentText) return;
+          commentText = censorText(commentText);
+          const newComment = {
+            username: "Anonymous",
+            text: commentText,
+            date: new Date().toISOString()
+          };
+          if (!post.comments) {
+            post.comments = [];
+          }
+          post.comments.push(newComment);
+          commentInput.value = '';
+          sortPosts();
+        });
+    
+        commentsSection.appendChild(commentForm);
+        postDiv.appendChild(commentsSection);
+    
         container.appendChild(postDiv);
       });
     }
@@ -647,14 +840,12 @@
     
     function openModal() {
       modalOverlay.classList.add('show');
-      // Add "pressed" class to blur/darken the create-post button
       openModalBtn.classList.add('pressed');
     }
     function closeModal() {
       modalOverlay.classList.remove('show');
       document.getElementById('modalPostText').value = '';
       document.getElementById('modalPostImage').value = '';
-      // Remove the "pressed" class when modal is closed
       openModalBtn.classList.remove('pressed');
     }
     openModalBtn.addEventListener('click', openModal);
@@ -664,7 +855,6 @@
     // Handle post creation from modal
     modalCreatePostBtn.addEventListener('click', async () => {
       let text = document.getElementById('modalPostText').value.trim();
-      // Censor the text
       text = censorText(text);
       const fileInput = document.getElementById('modalPostImage');
       let imageData = null;
@@ -685,14 +875,15 @@
         image: imageData,
         likes: 0,
         dislikes: 0,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        comments: []
       };
       posts.unshift(newPost);
       closeModal();
       sortPosts();
     });
     
-    // Load the banned words from goss/utils/bad-words.txt (one word per line).
+    // Load banned words from external file (if available)
     fetch('utils/bad-words.txt')
       .then(response => response.text())
       .then(text => {
@@ -703,17 +894,6 @@
       })
       .catch(error => console.error('Error loading bad-words.txt:', error));
     
-    // Censorship: Replace banned words with asterisks
-    function censorText(text) {
-      let censored = text;
-      const badWords = bannedWords;
-      badWords.forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-        censored = censored.replace(regex, '*'.repeat(word.length));
-      });
-      return censored;
-    }
-    
     // Side Menu functionality
     const sideMenu = document.getElementById('sideMenu');
     const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -722,7 +902,6 @@
       sideMenu.classList.toggle('show');
     });
     
-    // Optional: Side Menu item click listeners
     document.getElementById('menuProfile').addEventListener('click', () => {
       alert("Profile page coming soon!");
       sideMenu.classList.remove('show');
