@@ -184,11 +184,16 @@
       margin-bottom: 20px;
       position: relative;
     }
-    .post .post-text {
-      font-size: 18px;
-      margin-bottom: 10px;
-      white-space: pre-wrap;
-      color: var(--main-text-color);
+    /* New post rendering: username and content */
+    .post-user {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--school-name-color);
+      margin-bottom: 4px;
+    }
+    .post-content {
+      font-size: 16px;
+      color: #fff;
     }
     .post img.post-image {
       max-width: 100%;
@@ -300,7 +305,6 @@
       border-radius: 4px;
       background-color: #222;
       color: var(--main-text-color);
-      resize: vertical;
       font-size: 16px;
       resize: none;
       overflow: hidden;
@@ -310,13 +314,14 @@
     }
     /* Custom File Upload Icon Button */
     .custom-file-btn {
-      display: inline-block;
-      margin-top: 10px;
+      display: block;
+      margin: 10px auto;
       cursor: pointer;
+      text-align: center;
     }
     .custom-file-btn svg {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       fill: var(--main-accent);
       transition: fill 0.3s;
     }
@@ -324,10 +329,8 @@
       fill: #ff8c00;
     }
     .modal-container .modal-btns {
-      margin-top: 15px;
-      display: flex;
-      align-items: right;
-      justify-content: space-between;
+      margin-top: 20px;
+      text-align: center;
     }
     .modal-container .modal-btns button {
       padding: 10px 20px;
@@ -365,8 +368,8 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1050;
-      width: 60px;
-      height: 60px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       border: none;
       cursor: pointer;
@@ -380,8 +383,8 @@
       transform: translateX(-50%) scale(0.95);
     }
     .create-post-btn svg {
-      width: 24px;
-      height: 24px;
+      width: 40px;
+      height: 40px;
       fill: white;
     }
     .create-post-btn::before {
@@ -397,6 +400,12 @@
       border-radius: 50%;
     }
     
+    /* Additional style for when the create-post button is pressed */
+    .create-post-btn.pressed {
+      filter: blur(5px) brightness(0.5);
+      transition: filter 0.3s ease;
+    }
+    
     /* Mobile adjustments */
     @media (max-width: 600px) {
       .navbar .logo { font-size: 20px; }
@@ -404,8 +413,8 @@
       .feed-title h1 { font-size: 28px; }
       .sort-header .title { font-size: 18px; }
       .sort-btn { font-size: 14px; padding: 6px 12px; }
-      .create-post-btn { width: 50px; height: 50px; }
-      .create-post-btn svg { width: 20px; height: 20px; }
+      .create-post-btn { width: 100px; height: 100px; }
+      .create-post-btn svg { width: 40px; height: 40px; }
     }
   </style>
 </head>
@@ -482,12 +491,26 @@
         <img class ="icon" src="./assets/img.svg" width="100" height="100">
       </label>
       <div class="modal-btns">
-        <button id="modalCreatePostBtn">Buzz</button>
+        <button id="modalCreatePostBtn">Post</button>
       </div>
     </div>
   </div>
   
   <script>
+    // Banned words array (simulate loading from bad-words.txt)
+    const badWords = ["fuck", "shit", "bitch", "ass", "damn", "crap"];
+    
+    // Function to censor text by replacing banned words with asterisks
+    function censorText(text) {
+      let censored = text;
+      badWords.forEach(word => {
+        // Create a case-insensitive regex to match whole words
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        censored = censored.replace(regex, '*'.repeat(word.length));
+      });
+      return censored;
+    }
+    
     let posts = []; // Array to hold posts: { text, image, likes, dislikes, date }
     
     // Format date for display
@@ -527,19 +550,18 @@
         const postDiv = document.createElement('div');
         postDiv.className = 'post';
     
-        if (post.text) {
-          const textDiv = document.createElement('div');
-          textDiv.className = 'post-text';
-          textDiv.textContent = post.text;
-          postDiv.appendChild(textDiv);
-        }
-        if (post.image) {
-          const img = document.createElement('img');
-          img.className = 'post-image';
-          img.src = post.image;
-          img.alt = "Attached Image";
-          postDiv.appendChild(img);
-        }
+        // Create a username element (always "Anonymous")
+        const userDiv = document.createElement('div');
+        userDiv.className = 'post-user';
+        userDiv.textContent = "Anonymous";
+        postDiv.appendChild(userDiv);
+    
+        // Create content element with censored text (displayed in white)
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'post-content';
+        contentDiv.textContent = post.text;
+        postDiv.appendChild(contentDiv);
+    
         const dateDiv = document.createElement('div');
         dateDiv.className = 'post-date';
         dateDiv.textContent = formatDate(post.date);
@@ -566,8 +588,8 @@
         likeCount.textContent = posts[index].likes;
         actionsDiv.appendChild(likeCount);
     
-        // Dislike button with SVG and confetti
-        const dislikeBtn = document.createElement('button');
+         // Dislike button with SVG and confetti
+       const dislikeBtn = document.createElement('button');
         dislikeBtn.innerHTML = `
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22L1.14 11.27C1.05 11.5 1 11.74 1 12v1c0 
@@ -625,19 +647,25 @@
     
     function openModal() {
       modalOverlay.classList.add('show');
+      // Add "pressed" class to blur/darken the create-post button
+      openModalBtn.classList.add('pressed');
     }
     function closeModal() {
       modalOverlay.classList.remove('show');
       document.getElementById('modalPostText').value = '';
       document.getElementById('modalPostImage').value = '';
+      // Remove the "pressed" class when modal is closed
+      openModalBtn.classList.remove('pressed');
     }
     openModalBtn.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
-    cancelModalBtn.addEventListener('click', closeModal);
+    if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
     
     // Handle post creation from modal
     modalCreatePostBtn.addEventListener('click', async () => {
-      const text = document.getElementById('modalPostText').value.trim();
+      let text = document.getElementById('modalPostText').value.trim();
+      // Censor the text
+      text = censorText(text);
       const fileInput = document.getElementById('modalPostImage');
       let imageData = null;
       if (!text && fileInput.files.length === 0) {
@@ -664,6 +692,28 @@
       sortPosts();
     });
     
+    // Load the banned words from goss/utils/bad-words.txt (one word per line).
+    fetch('utils/bad-words.txt')
+      .then(response => response.text())
+      .then(text => {
+        bannedWords = text.split('\n')
+                          .map(word => word.trim().toLowerCase())
+                          .filter(word => word.length > 0);
+        console.log('Banned words loaded:', bannedWords);
+      })
+      .catch(error => console.error('Error loading bad-words.txt:', error));
+    
+    // Censorship: Replace banned words with asterisks
+    function censorText(text) {
+      let censored = text;
+      const badWords = bannedWords;
+      badWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        censored = censored.replace(regex, '*'.repeat(word.length));
+      });
+      return censored;
+    }
+    
     // Side Menu functionality
     const sideMenu = document.getElementById('sideMenu');
     const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -689,5 +739,13 @@
     // Initial render of posts
     renderPosts();
   </script>
+  
+  <style>
+    /* Additional style for when the create-post button is pressed */
+    .create-post-btn.pressed {
+      filter: blur(5px) brightness(0.5);
+      transition: filter 0.3s ease;
+    }
+  </style>
 </body>
 </html>
